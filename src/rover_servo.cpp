@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "rover_servo.h"
+#include "rover_kinematics.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "ESP32Servo.h"
@@ -175,30 +176,28 @@ static void reset_moving_servo(RoverServoId servoId)
 
 static uint16_t calibrated_servo_map(RoverServoId servoId, uint16_t us, uint16_t in_low, uint16_t in_high, uint16_t out_low, uint16_t out_high)
 {
-  uint16_t val = map(us, in_low, in_high, out_low, out_high);
-  
+  (void)in_low;
+  (void)in_high;
+  (void)out_low;
+  (void)out_high;
+  int16_t offset = 0;
+
   switch (servoId) {
     case SERVO_FRONT_LEFT:
-      val += SERVO_FRONT_LEFT_OFFSET;
+      offset = SERVO_FRONT_LEFT_OFFSET;
       break;
     case SERVO_FRONT_RIGHT:
-      val += SERVO_FRONT_RIGHT_OFFSET;
+      offset = SERVO_FRONT_RIGHT_OFFSET;
       break;
     case SERVO_BACK_LEFT:
-      val += SERVO_BACK_LEFT_OFFSET;
+      offset = SERVO_BACK_LEFT_OFFSET;
       break;
     case SERVO_BACK_RIGHT:
-      val += SERVO_BACK_RIGHT_OFFSET;
+      offset = SERVO_BACK_RIGHT_OFFSET;
       break;
     default:
       break;
   }
 
-  if (val < SERVOMIN_FULL_RANGE) {
-    val = SERVOMIN_FULL_RANGE;
-  } else if (val > SERVOMAX_FULL_RANGE) {
-    val = SERVOMAX_FULL_RANGE;
-  }
-
-  return val;
+  return calculate_servo_ticks(static_cast<uint8_t>(servoId), us, offset);
 }

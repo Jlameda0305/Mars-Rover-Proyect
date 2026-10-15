@@ -13,6 +13,7 @@
 #include "wifi_controller.h"
 #include "rover_servo.h"
 #include "rover_driving.h"
+#include "rover_kinematics.h"
 
 #define DEBUG
 
@@ -107,15 +108,6 @@ static void handle_controller_disconnected(uint16_t last_sampled_signal) {
 }
 
 static uint16_t filter_signal(uint16_t* signals) {
-    uint32_t signal = 0;
-    for (uint8_t i = 0; i < RC_FILTER_SAMPLES; i++) {
-        signal += signals[i];
-    }
-    signal = signal / RC_FILTER_SAMPLES;
-
-    if (signal <= 800) return RC_CENTER; // If controller disconnected or invalid signal
-    if (signal > 800 && signal < 1010) return RC_LOW;
-    if (signal > 1990) return RC_HIGH;
-    if (signal > 1480 && signal < 1520) return RC_CENTER;
-    return signal;
+    return filter_rc_signal(signals, RC_FILTER_SAMPLES);
 }
+
