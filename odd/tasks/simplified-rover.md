@@ -41,16 +41,32 @@ Se desacoplan el brazo robótico (6 DOF), el mástil de la cámara (2 DOF), el t
   - *Evidencia observada:* UI responsive moderna con joysticks duales para Acelerador/Dirección, modos Normal (4WS) y Spin (360°), botón EMERGENCY STOP, telemetría e indicador dinámico de conexión. Validación sintáctica OK.
   - *Commit:* `0cb1eed` (`feat(web): redesign index.html for dedicated rc car driving interface`)
   - *RDD Assessment:* Inaccesible / No disponible.
-- [x] **TASK-03:** Verificación de sintaxis, integridad del sistema y documentación de prueba.
+- [x] **TASK-03:** Verificación inicial de sintaxis, integridad del sistema y documentación de prueba.
   - *Ruta:* Directa inline
   - *Evidencia observada:* Verificación de dependencias y sintaxis OK, documentación de prueba y pasos de flasheo completados.
-  - *Commit:* Pendiente (próximo commit de cierre)
+  - *Commit:* `1301746` (`docs: record task completion and verification for simplified rover`)
+- [x] **TASK-04:** Depuración completa de subsistemas ajenos (`arm`, `rover_head`, `lora`, `rc_receiver_rmt`, `rover_settings_switch`, `gyro_accel_sensor`, `switch_checker`) y limpieza de `platformio.ini`.
+  - *Ruta:* Delegada (Writer Trigger)
+  - *Evidencia observada:* Eliminación de 14 archivos huérfanos en `src/`, migración de `RoverMode` a `rover_driving.h`, remoción de `switch_checker.h` de `main.cpp` y purga de dependencias en `platformio.ini`.
+  - *Commit:* `b79012f` (`refactor(firmware): purge orphan subsystems and clean platformio dependencies`)
+- [x] **TASK-05:** Desacoplamiento de la cinemática de motricidad (`rover_kinematics.h/.cpp`) y creación de la suite de pruebas nativas (`test/test_rover_kinematics.cpp`).
+  - *Ruta:* Delegada (Writer Trigger)
+  - *Evidencia observada:* Módulo puro `rover_kinematics.h/.cpp` implementado con cero dependencias Arduino/FreeRTOS. Integrado en `rover_driving.cpp`, `main.cpp` y `rover_servo.cpp`. Suite nativa `test_rover_kinematics.cpp` ejecutada con `g++ -std=c++17` superando 6 suites y 184/184 aserciones (100%).
+  - *Commit:* `190ec4a` (`feat(kinematics): decouple kinematic calculations and add native unit test suite`)
+- [ ] **TASK-06:** Ejecución de pruebas nativas con `g++`, verificación integral y cierre del feature.
+  - *Ruta:* Directa inline
+  - *Evidencia esperada:* 100% de aserciones de prueba superadas, firmware compilable y cierre documentado.
+  - *Commit:* Conventional commit de cierre.
 
 ---
 
 ## 4. Registro de Verificación y Evidencias
 - *TASK-01 Commit:* `9e53a32`
 - *TASK-02 Commit:* `0cb1eed`
-- *TASK-03 Commit:* Pendiente
-- *Running Changed Lines:* ~450 líneas authored (additions + deletions excluyendo autogenerados)
+- *TASK-03 Commit:* `1301746`
+- *TASK-04 Commit:* `b79012f`
+- *TASK-05 Commit:* `190ec4a`
+- *TASK-06 Commit:* Pendiente
+- *Running Changed Lines:* ~800 líneas authored (additions + deletions excluyendo autogenerados)
+
 
