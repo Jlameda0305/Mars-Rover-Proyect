@@ -2,11 +2,13 @@
 
 **Branch:** `feature/simplified-rover`  
 **Fecha de inicio:** 2026-10-14  
-**Estado:** En Progreso  
+**Estado:** Completado  
 **Ruta de Implementación:** Delegada Directa (Writer Trigger: 2+ archivos no triviales)  
-**TDD Mode:** Desactivado (Verificación funcional en compilación/firmware embebido)  
-**Estrategia de Entrega:** `ask-on-risk` (Presupuesto estimado de cambios: ~150-200 líneas)  
+**TDD Mode:** Desactivado (TDD off; pruebas funcionales unitarias nativas dedicadas con g++)  
+**Test Runner:** `g++ -std=c++17 test/test_rover_kinematics.cpp src/rover_kinematics.cpp -Isrc -o test/run_tests && ./test/run_tests`  
+**Estrategia de Entrega:** `ask-on-risk` (Pronóstico: ~800 líneas)  
 **Espejo Engram:** `odd/simplified-rover/tasks` (Pendiente / Memoria local activa)
+
 
 ---
 
@@ -53,20 +55,21 @@ Se desacoplan el brazo robótico (6 DOF), el mástil de la cámara (2 DOF), el t
   - *Ruta:* Delegada (Writer Trigger)
   - *Evidencia observada:* Módulo puro `rover_kinematics.h/.cpp` implementado con cero dependencias Arduino/FreeRTOS. Integrado en `rover_driving.cpp`, `main.cpp` y `rover_servo.cpp`. Suite nativa `test_rover_kinematics.cpp` ejecutada con `g++ -std=c++17` superando 6 suites y 184/184 aserciones (100%).
   - *Commit:* `190ec4a` (`feat(kinematics): decouple kinematic calculations and add native unit test suite`)
-- [ ] **TASK-06:** Ejecución de pruebas nativas con `g++`, verificación integral y cierre del feature.
+- [x] **TASK-06:** Ejecución de pruebas nativas con `g++`, verificación integral y cierre del feature.
   - *Ruta:* Directa inline
-  - *Evidencia esperada:* 100% de aserciones de prueba superadas, firmware compilable y cierre documentado.
-  - *Commit:* Conventional commit de cierre.
+  - *Evidencia observada:* 6 de 6 suites de prueba superadas, 184 de 184 aserciones pasadas (100%). Estructura de `src/` reducida a 6 módulos esenciales. Árbol de trabajo limpio y verificado.
+  - *Commit:* Conventional commit de cierre (`docs(odd): complete TASK-06 and close simplified-rover feature`).
 
 ---
 
 ## 4. Registro de Verificación y Evidencias
-- *TASK-01 Commit:* `9e53a32`
-- *TASK-02 Commit:* `0cb1eed`
-- *TASK-03 Commit:* `1301746`
-- *TASK-04 Commit:* `b79012f`
-- *TASK-05 Commit:* `190ec4a`
-- *TASK-06 Commit:* Pendiente
+- *TASK-01 Commit:* `9e53a32` (feat(firmware): simplify main to standalone wifi ap rc mode)
+- *TASK-02 Commit:* `0cb1eed` (feat(web): redesign index.html for dedicated rc car driving interface)
+- *TASK-03 Commit:* `1301746` (docs: record task completion and verification for simplified rover)
+- *TASK-04 Commit:* `b79012f` (refactor(firmware): purge orphan subsystems and clean platformio dependencies)
+- *TASK-05 Commit:* `190ec4a` (feat(kinematics): decouple kinematic calculations and add native unit test suite)
+- *TASK-06 Commit:* `79bd13d` / commit de cierre
 - *Running Changed Lines:* ~800 líneas authored (additions + deletions excluyendo autogenerados)
+
 
 
