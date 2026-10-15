@@ -55,10 +55,18 @@ Se desacoplan el brazo robótico (6 DOF), el mástil de la cámara (2 DOF), el t
   - *Ruta:* Delegada (Writer Trigger)
   - *Evidencia observada:* Módulo puro `rover_kinematics.h/.cpp` implementado con cero dependencias Arduino/FreeRTOS. Integrado en `rover_driving.cpp`, `main.cpp` y `rover_servo.cpp`. Suite nativa `test_rover_kinematics.cpp` ejecutada con `g++ -std=c++17` superando 6 suites y 184/184 aserciones (100%).
   - *Commit:* `190ec4a` (`feat(kinematics): decouple kinematic calculations and add native unit test suite`)
-- [x] **TASK-06:** Ejecución de pruebas nativas con `g++`, verificación integral y cierre del feature.
-  - *Ruta:* Directa inline
-  - *Evidencia observada:* 6 de 6 suites de prueba superadas, 184 de 184 aserciones pasadas (100%). Estructura de `src/` reducida a 6 módulos esenciales. Árbol de trabajo limpio y verificado.
-  - *Commit:* Conventional commit de cierre (`docs(odd): complete TASK-06 and close simplified-rover feature`).
+- [x] **TASK-07:** Migración a control directo GPIO de los 4 servos de dirección (eliminación de PCA9685 e I2C).
+  - *Ruta:* Delegada (Writer Trigger: 2+ archivos no triviales)
+  - *Alcance:*
+    - Actualizar `src/rover_config.h` con pines GPIO 18, 19, 21, 22 para los servos de dirección y remover definiciones de I2C.
+    - Modificar `src/rover_servo.h` y `src/rover_servo.cpp` para instanciar y controlar los 4 servos directamente con `ESP32Servo`, eliminando `Adafruit_PWMServoDriver`, `Wire.h` y semáforos I2C.
+    - Actualizar `src/main.cpp` para remover `Wire.begin` y la creación del semáforo I2C.
+    - Actualizar `platformio.ini` para remover la dependencia `Adafruit PWM Servo Driver Library`.
+    - Actualizar `diagram.json` para reflejar los 6 servos directos en Wokwi.
+    - Actualizar `libraries.txt` y `sketch.ino`.
+    - Ejecutar pruebas nativas y pruebas de compilación PlatformIO.
+  - *Evidencia observada:* Compilación PlatformIO exitosa ([SUCCESS], Flash: 69.3%, RAM: 14.6%). Suite nativa test_rover_kinematics.cpp aprobada al 100% (6/6 suites, 184/184 aserciones).
+  - *Commit:* `82450fc` (`feat(servo): migrate steering servos to direct GPIO control with ESP32Servo`)
 
 ---
 
@@ -68,8 +76,9 @@ Se desacoplan el brazo robótico (6 DOF), el mástil de la cámara (2 DOF), el t
 - *TASK-03 Commit:* `1301746` (docs: record task completion and verification for simplified rover)
 - *TASK-04 Commit:* `b79012f` (refactor(firmware): purge orphan subsystems and clean platformio dependencies)
 - *TASK-05 Commit:* `190ec4a` (feat(kinematics): decouple kinematic calculations and add native unit test suite)
-- *TASK-06 Commit:* `79bd13d` / commit de cierre
-- *Running Changed Lines:* ~800 líneas authored (additions + deletions excluyendo autogenerados)
+- *TASK-06 Commit:* `e21b264` (docs(odd): complete TASK-06 and close simplified-rover feature)
+- *TASK-07 Commit:* `82450fc` (feat(servo): migrate steering servos to direct GPIO control with ESP32Servo)
+- *Running Changed Lines:* ~1150 líneas authored (additions + deletions excluyendo autogenerados)
 
 
 

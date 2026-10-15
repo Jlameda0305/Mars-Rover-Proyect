@@ -8,7 +8,6 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
 #include <esp_log.h>
-#include <Wire.h>
 #include "rover_config.h"
 #include "wifi_controller.h"
 #include "rover_servo.h"
@@ -115,14 +114,7 @@ void setup() {
     Serial.println(" Commands: F, B, L, R, S, P");
     Serial.println("=================================");
 
-    Wire.begin(ROVER_SDA_PIN, ROVER_SCL_PIN);
-    Wire.setClock(400000);
-
-    xSemaphoreHandle i2cSemaphoreHandle = xSemaphoreCreateBinary();
-    assert(i2cSemaphoreHandle != NULL);
-    xSemaphoreGive(i2cSemaphoreHandle);
-
-    rover_servo_init(i2cSemaphoreHandle);
+    rover_servo_init();
     rover_driving_init();
     handle_controller_disconnected(0);
 

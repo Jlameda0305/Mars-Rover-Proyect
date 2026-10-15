@@ -42,22 +42,12 @@
 
 #define ARM_NUM_AXIS 6
 
-#ifdef NINA_W10
-#define ROVER_SCL_PIN               5
-#define ROVER_SDA_PIN               23
-#else
-#define ROVER_SCL_PIN               22
-#define ROVER_SDA_PIN               21
-#endif
-
-#define SERVOMIN  250 // this is the 'minimum' pulse length count (out of 4096)
-#define SERVOMAX  500 // this is the 'maximum' pulse length count (out of 4096)
-
-#define SERVOMIN_FULL_RANGE  150 // this is the 'minimum' pulse length count (out of 4096)
-#define SERVOMAX_FULL_RANGE  600 // this is the 'maximum' pulse length count (out of 4096)
-
-#define ROVER_MOTORS_LEFT_PIN       17
-#define ROVER_MOTORS_RIGHT_PIN      13
+#define ROVER_MOTORS_LEFT_PIN        17
+#define ROVER_MOTORS_RIGHT_PIN       13
+#define ROVER_SERVO_FRONT_LEFT_PIN   18
+#define ROVER_SERVO_FRONT_RIGHT_PIN  19
+#define ROVER_SERVO_BACK_LEFT_PIN    21
+#define ROVER_SERVO_BACK_RIGHT_PIN   22
 
 #define ROVER_SETTINGS_SWITCH_1     2
 #define ROVER_SETTINGS_SWITCH_2     23

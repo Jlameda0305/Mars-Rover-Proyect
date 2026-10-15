@@ -9,11 +9,6 @@
 #include "esp_err.h"
 #include "assert.h"
 
-#include <Wire.h>
-#include <Adafruit_PWMServoDriver.h>
-
-#define ADAFRUIT_PWM_EXPANDER_ADDR  0x40
-
 #define SERVO_UPDATE_INTERVAL_MS  10
 
 typedef enum ServoDirection {
@@ -38,16 +33,14 @@ typedef struct ServoState {
 
 static void update_servo_positions_timer_cb(void* arg);
 static void reset_moving_servo(RoverServoId servoId);
-static uint16_t calibrated_servo_map(RoverServoId servoId, uint16_t us, uint16_t in_low, uint16_t in_high, uint16_t out_low, uint16_t out_high);
+static int16_t get_servo_offset(RoverServoId servoId);
 
-static xSemaphoreHandle position_update_sem_handle;
-static xSemaphoreHandle i2cSemaphoreHandle;
-
-static Adafruit_PWMServoDriver servo_driver = Adafruit_PWMServoDriver(ADAFRUIT_PWM_EXPANDER_ADDR, Wire);
+static Servo steering_servos[SERVO_LAST];
+static xSemaphoreHandle position_update_sem_handle = NULL;
 static bool isInitialized = false;
 static ServoState servo_states[SERVO_LAST];
 
-void rover_servo_init(xSemaphoreHandle i2cSemHandle) {
+void rover_servo_init(void) {
   TaskHandle_t xHandle = NULL;
   if (!isInitialized) {
     isInitialized = true;
@@ -55,11 +48,16 @@ void rover_servo_init(xSemaphoreHandle i2cSemHandle) {
     for (uint8_t i = 0; i < SERVO_LAST; i++) {
       servo_states[i].current_pos = RC_CENTER;
     }
-    i2cSemaphoreHandle = i2cSemHandle;
-    assert(pdTRUE == xSemaphoreTake(i2cSemaphoreHandle, pdMS_TO_TICKS(100)));
-    servo_driver.begin();
-    servo_driver.setPWMFreq(60);
-    xSemaphoreGive(i2cSemaphoreHandle);
+
+    steering_servos[SERVO_FRONT_LEFT].attach(ROVER_SERVO_FRONT_LEFT_PIN);
+    steering_servos[SERVO_FRONT_RIGHT].attach(ROVER_SERVO_FRONT_RIGHT_PIN);
+    steering_servos[SERVO_BACK_LEFT].attach(ROVER_SERVO_BACK_LEFT_PIN);
+    steering_servos[SERVO_BACK_RIGHT].attach(ROVER_SERVO_BACK_RIGHT_PIN);
+
+    for (uint8_t i = 0; i < SERVO_LAST; i++) {
+      steering_servos[i].writeMicroseconds(RC_CENTER);
+    }
+
     position_update_sem_handle = xSemaphoreCreateBinary();
     assert(position_update_sem_handle);
     xSemaphoreGive(position_update_sem_handle);
@@ -68,25 +66,41 @@ void rover_servo_init(xSemaphoreHandle i2cSemHandle) {
   }
 }
 
+static int16_t get_servo_offset(RoverServoId servoId) {
+  switch (servoId) {
+    case SERVO_FRONT_LEFT:
+      return SERVO_FRONT_LEFT_OFFSET;
+    case SERVO_FRONT_RIGHT:
+      return SERVO_FRONT_RIGHT_OFFSET;
+    case SERVO_BACK_LEFT:
+      return SERVO_BACK_LEFT_OFFSET;
+    case SERVO_BACK_RIGHT:
+      return SERVO_BACK_RIGHT_OFFSET;
+    default:
+      return 0;
+  }
+}
+
 void rover_servo_write(RoverServoId servoId, uint16_t us, bool full_range)
 {
+  (void)full_range;
   assert(servoId < SERVO_LAST);
   assert(us >= RC_LOW);
   assert(us <= RC_HIGH);
   xSemaphoreTake(position_update_sem_handle, portMAX_DELAY);
-  uint16_t pwm_value;
-  if (full_range) {
-    pwm_value = map(us, RC_LOW, RC_HIGH, SERVOMIN_FULL_RANGE, SERVOMAX_FULL_RANGE);
-  } else {
-    pwm_value = calibrated_servo_map(servoId, us, RC_LOW, RC_HIGH, SERVOMIN, SERVOMAX);
+
+  int16_t offset = get_servo_offset(servoId);
+  int32_t target_us = static_cast<int32_t>(us) + offset;
+  if (target_us < 600) {
+    target_us = 600;
+  } else if (target_us > 2400) {
+    target_us = 2400;
   }
 
   reset_moving_servo(servoId);
   servo_states[servoId].current_pos = us;
 
-  assert(pdTRUE == xSemaphoreTake(i2cSemaphoreHandle, pdMS_TO_TICKS(1000)));
-  servo_driver.setPWM((uint8_t)servoId, 0, pwm_value);
-  xSemaphoreGive(i2cSemaphoreHandle);
+  steering_servos[servoId].writeMicroseconds(static_cast<uint16_t>(target_us));
   xSemaphoreGive(position_update_sem_handle);
 }
 
@@ -108,7 +122,7 @@ void rover_servo_move(RoverServoId servoId, uint16_t pos, uint8_t speed)
   servo_state->end_pos = pos;
   servo_state->start_pos = servo_state->current_pos;
   servo_state->speed = internal_speed;
-  steps_to_move = abs(servo_state->end_pos - servo_state->current_pos);
+  steps_to_move = abs((int32_t)servo_state->end_pos - (int32_t)servo_state->current_pos);
   servo_state->num_moves = (steps_to_move / SERVO_UPDATE_INTERVAL_MS);
   if (servo_state->num_moves == 0) {
     servo_state->num_moves = 1;
@@ -144,7 +158,7 @@ static void update_servo_positions_timer_cb(void* arg)
       axis->num_moves_finished++;
       if (axis->num_moves_finished % axis->speed == 0) {
         // Check if last move
-        if (abs(axis->current_pos - axis->end_pos) <= axis->steps_per_move) {
+        if (abs((int32_t)axis->current_pos - (int32_t)axis->end_pos) <= axis->steps_per_move) {
           axis->current_pos = axis->end_pos;
           next_servo_pos = axis->end_pos;
           axis->num_moves = 0;
@@ -172,32 +186,4 @@ static void reset_moving_servo(RoverServoId servoId)
   assert(servoId < SERVO_LAST);
   memset(&servo_states[servoId], 0 , sizeof(ServoState));
   servo_states[servoId].isPaused = true;
-}
-
-static uint16_t calibrated_servo_map(RoverServoId servoId, uint16_t us, uint16_t in_low, uint16_t in_high, uint16_t out_low, uint16_t out_high)
-{
-  (void)in_low;
-  (void)in_high;
-  (void)out_low;
-  (void)out_high;
-  int16_t offset = 0;
-
-  switch (servoId) {
-    case SERVO_FRONT_LEFT:
-      offset = SERVO_FRONT_LEFT_OFFSET;
-      break;
-    case SERVO_FRONT_RIGHT:
-      offset = SERVO_FRONT_RIGHT_OFFSET;
-      break;
-    case SERVO_BACK_LEFT:
-      offset = SERVO_BACK_LEFT_OFFSET;
-      break;
-    case SERVO_BACK_RIGHT:
-      offset = SERVO_BACK_RIGHT_OFFSET;
-      break;
-    default:
-      break;
-  }
-
-  return calculate_servo_ticks(static_cast<uint8_t>(servoId), us, offset);
 }
