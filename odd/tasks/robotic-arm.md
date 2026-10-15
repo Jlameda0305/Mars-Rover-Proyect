@@ -62,11 +62,11 @@ Garantizar que el sistema sea:
   - *Commit:* `09e7975`
   - *RDD Assess:* `unavailable` (runtime 'antigravity').
 
-- [ ] **TASK-05:** Verificación Funcional Integral End-to-End, Ejecución de Pruebas y Cierre
+- [x] **TASK-05:** Verificación Funcional Integral End-to-End, Ejecución de Pruebas y Cierre
   - *Ruta:* Directa inline
-  - *Evidencia esperada:* Ejecución completa de pruebas nativas, verificación estática de archivos y reporte final.
+  - *Evidencia observada:* Verificación integral del pipeline completo (desde `main.cpp` pasando por `arm.cpp`, `arm_servo.cpp`, `arm_kinematics.cpp`, `wifi_controller.cpp` hasta `data/index.html`). Ejecución de suite de pruebas nativas con `g++ -std=c++17 -Wall -Wextra -Wpedantic -Werror` superando 8 de 8 suites y 891 de 891 aserciones. Verificación estática de assets web y sintaxis JS sin advertencias.
   - *Commit:* Conventional commit en rama `feature/robotic-arm`.
-  - *RDD Assess:* Pendiente de commit.
+  - *RDD Assess:* `unavailable` (runtime 'antigravity').
 
 ---
 
@@ -75,6 +75,7 @@ Garantizar que el sistema sea:
 - *TASK-02 Commit:* `70b5230` (test(arm): implement native test suite and runner for kinematics and mock driver (TASK-02))
 - *TASK-03 Commit:* `4a4b58b` (refactor(arm): decouple embedded hardware layer and remove non-arm subsystems (TASK-03))
 - *TASK-04 Commit:* `09e7975` (feat(ui): implement dedicated 6-DOF robotic arm web dashboard and websocket protocol (TASK-04))
-- *TASK-05 Commit:* Pendiente
+- *TASK-05 Commit:* `1cc43db` (docs(odd): complete TASK-05 and close robotic-arm feature)
+
 
 
