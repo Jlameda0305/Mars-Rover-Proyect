@@ -56,11 +56,11 @@ Garantizar que el sistema sea:
   - *Commit:* `4a4b58b`
   - *RDD Assess:* `unavailable` (runtime 'antigravity').
 
-- [ ] **TASK-04:** Protocolo de Comunicación y Dashboard Web Dedicado (`wifi_controller.cpp`, `data/index.html`)
+- [x] **TASK-04:** Protocolo de Comunicación y Dashboard Web Dedicado (`wifi_controller.cpp`, `data/index.html`)
   - *Ruta:* Delegada (Writer Trigger)
-  - *Evidencia esperada:* `index.html` con HUD responsivo para los 6 ejes (Base, Hombro, Codo, Muñeca Pitch, Muñeca Roll, Pinza), sliders de grado/pulso, jogging táctil, presets (Home/Rest/Open/Close), y WebSocket bidireccional.
-  - *Commit:* Conventional commit en rama `feature/robotic-arm`.
-  - *RDD Assess:* Pendiente de commit.
+  - *Evidencia observada:* Eliminación de `src/rover_config.h` y migración a `src/arm_config.h`. Protocolo WebSocket en `wifi_controller.cpp` con soporte binario de 12 bytes (`uint16_t[6]`) y parser de comandos JSON (`home`, `rest`, `stop`, `jog`, `set_joint`, `set_deg`, `get_state`). Broadcast de estado del brazo `wifi_controller_broadcast_arm_state()` a 10 Hz en `main.cpp`. Rediseño integral de `data/index.html` estilo dark theme sci-fi/control de misión, 100% autocontenido (sin CDNs externas), tarjetas para los 6 ejes, hold-to-jog táctil con pointer events, sliders debounced, presets rápidos (Open/Half/Closed y Min/Center/Max), velocidad global (1..10) y joysticks táctiles duales colapsables. Verificación de sintaxis HTML/JS y pruebas unitarias al 100%.
+  - *Commit:* `09e7975`
+  - *RDD Assess:* `unavailable` (runtime 'antigravity').
 
 - [ ] **TASK-05:** Verificación Funcional Integral End-to-End, Ejecución de Pruebas y Cierre
   - *Ruta:* Directa inline
@@ -74,6 +74,7 @@ Garantizar que el sistema sea:
 - *TASK-01 Commit:* `416dfb5` (feat(arm): implement decoupled kinematics and configuration layer (TASK-01))
 - *TASK-02 Commit:* `70b5230` (test(arm): implement native test suite and runner for kinematics and mock driver (TASK-02))
 - *TASK-03 Commit:* `4a4b58b` (refactor(arm): decouple embedded hardware layer and remove non-arm subsystems (TASK-03))
-- *TASK-04 Commit:* Pendiente
+- *TASK-04 Commit:* `09e7975` (feat(ui): implement dedicated 6-DOF robotic arm web dashboard and websocket protocol (TASK-04))
 - *TASK-05 Commit:* Pendiente
+
 
