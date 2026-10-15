@@ -47,7 +47,7 @@ Garantizar que el sistema sea:
 - [x] **TASK-02:** Implementación de la Suite de Pruebas Unitarias Nativas (`test/test_arm_kinematics.cpp`)
   - *Ruta:* Delegada (Writer Trigger)
   - *Evidencia observada:* Suite nativa ejecutable con `g++ -std=c++17` validando 8 suites y 891 aserciones (nombres/límites de articulaciones, clamping de pulso y ángulo, ida y vuelta ángulo-pulso, cuentas PCA9685 para 1000/1500/2000/600/2400 us, cálculo de pasos de trayectoria suave con escalado de velocidad y sin sobrepaso, validez de presets HOME y REST, y MockPwmDriver implementando IPwmDriver). 100% de aserciones exitosas.
-  - *Commit:* `test(arm): implement native test suite and runner for kinematics and mock driver (TASK-02)`
+  - *Commit:* `70b5230`
   - *RDD Assess:* `unavailable` (runtime 'antigravity').
 
 - [ ] **TASK-03:** Adaptación de la Capa de Hardware Embebida (`arm_servo.cpp`, `arm.cpp`, `main.cpp`) y Eliminación de Módulos No Relacionados
@@ -72,7 +72,7 @@ Garantizar que el sistema sea:
 
 ## 4. Registro de Verificación y Evidencias
 - *TASK-01 Commit:* `416dfb5` (feat(arm): implement decoupled kinematics and configuration layer (TASK-01))
-- *TASK-02 Commit:* Pendiente
+- *TASK-02 Commit:* `70b5230` (test(arm): implement native test suite and runner for kinematics and mock driver (TASK-02))
 - *TASK-03 Commit:* Pendiente
 - *TASK-04 Commit:* Pendiente
 - *TASK-05 Commit:* Pendiente
