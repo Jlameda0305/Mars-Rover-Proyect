@@ -44,11 +44,11 @@ Garantizar que el sistema sea:
   - *Commit:* `416dfb5`
   - *RDD Assess:* `unavailable` (runtime 'antigravity' no elegible para revisión inmutable por gentle-ai).
 
-- [ ] **TASK-02:** Implementación de la Suite de Pruebas Unitarias Nativas (`test/test_arm_kinematics.cpp`)
+- [x] **TASK-02:** Implementación de la Suite de Pruebas Unitarias Nativas (`test/test_arm_kinematics.cpp`)
   - *Ruta:* Delegada (Writer Trigger)
-  - *Evidencia esperada:* Suite ejecutable con `g++ -std=c++17`, validando conversiones, límites, interpolación de trayectoria y Mock PWM Driver con 100% de aserciones exitosas.
-  - *Commit:* Conventional commit en rama `feature/robotic-arm`.
-  - *RDD Assess:* Pendiente de commit.
+  - *Evidencia observada:* Suite nativa ejecutable con `g++ -std=c++17` validando 8 suites y 891 aserciones (nombres/límites de articulaciones, clamping de pulso y ángulo, ida y vuelta ángulo-pulso, cuentas PCA9685 para 1000/1500/2000/600/2400 us, cálculo de pasos de trayectoria suave con escalado de velocidad y sin sobrepaso, validez de presets HOME y REST, y MockPwmDriver implementando IPwmDriver). 100% de aserciones exitosas.
+  - *Commit:* `test(arm): implement native test suite and runner for kinematics and mock driver (TASK-02)`
+  - *RDD Assess:* `unavailable` (runtime 'antigravity').
 
 - [ ] **TASK-03:** Adaptación de la Capa de Hardware Embebida (`arm_servo.cpp`, `arm.cpp`, `main.cpp`) y Eliminación de Módulos No Relacionados
   - *Ruta:* Delegada (Writer Trigger)
