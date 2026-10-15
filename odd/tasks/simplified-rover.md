@@ -68,6 +68,16 @@ Se desacoplan el brazo robótico (6 DOF), el mástil de la cámara (2 DOF), el t
   - *Evidencia observada:* Compilación PlatformIO exitosa ([SUCCESS], Flash: 69.3%, RAM: 14.6%). Suite nativa test_rover_kinematics.cpp aprobada al 100% (6/6 suites, 184/184 aserciones).
   - *Commit:* `82450fc` (`feat(servo): migrate steering servos to direct GPIO control with ESP32Servo`)
 
+- [x] **TASK-08:** Generación de planos esquemáticos técnicos de ingeniería CAD (Control GPIO, Tracción 6x6 de Motores y Distribución de Alimentación de Doble Riel).
+  - *Ruta:* Directa inline
+  - *Alcance:*
+    - Diagrama 1: Mapeo de control GPIO directo para 2 ESCs y 4 servos MG996R.
+    - Diagrama 2: Conexión en paralelo de los 6 motores DC a los 2 ESCs bidireccionales (3 motores izquierda, 3 motores derecha).
+    - Diagrama 3: Esquema de alimentación y distribución eléctrica desacoplada con doble riel (+7.4V directa a ESCs, +5.0V/5A UBEC para Servos y ESP32, y Bus Central de Masa GND en estrella).
+    - Formatos SVG vectorial, PNG de alta resolución y PDF de ingeniería.
+  - *Evidencia observada:* Generación y renderizado de `docs/schematic_circuit_diagram.*`, `docs/schematic_motors_traction.*` y `docs/schematic_power_supply.*`. Inspección visual de imágenes PNG aprobada con cero solapamientos.
+  - *Commit:* `20b56ca` (`docs: add motor traction and power distribution CAD schematics`)
+
 ---
 
 ## 4. Registro de Verificación y Evidencias
@@ -78,7 +88,8 @@ Se desacoplan el brazo robótico (6 DOF), el mástil de la cámara (2 DOF), el t
 - *TASK-05 Commit:* `190ec4a` (feat(kinematics): decouple kinematic calculations and add native unit test suite)
 - *TASK-06 Commit:* `e21b264` (docs(odd): complete TASK-06 and close simplified-rover feature)
 - *TASK-07 Commit:* `82450fc` (feat(servo): migrate steering servos to direct GPIO control with ESP32Servo)
-- *Running Changed Lines:* ~1150 líneas authored (additions + deletions excluyendo autogenerados)
+- *TASK-08 Commit:* `20b56ca` (docs: add motor traction and power distribution CAD schematics)
+- *Running Changed Lines:* ~1250 líneas authored (additions + deletions excluyendo autogenerados)
 
 
 
