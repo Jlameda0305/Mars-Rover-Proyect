@@ -1,52 +1,95 @@
-#include <Arduino.h>
 #include "arm.h"
-#include "rover_config.h"
-#include "rover_servo.h"
+#include <Arduino.h>
+#include <Wire.h>
 
-static RoverServoId axisToServo[ARM_NUM_AXIS] =
-{
-    [ARM_AXIS_1] = SERVO_ARM_AXIS_1,
-    [ARM_AXIS_2] = SERVO_ARM_AXIS_2,
-    [ARM_AXIS_3] = SERVO_ARM_AXIS_3,
-    [ARM_AXIS_4] = SERVO_ARM_AXIS_4,
-    [ARM_AXIS_5] = SERVO_ARM_AXIS_5,
-    [ARM_AXIS_6] = SERVO_ARM_AXIS_6,
-};
+static bool s_is_arm_initialized = false;
 
-static bool isInitialized = false;
+void arm_init(void) {
+    if (s_is_arm_initialized) {
+        return;
+    }
+    s_is_arm_initialized = true;
 
-void arm_init()
-{
+    // Initialize I2C with configured pins and clock
+    Wire.begin(ARM_I2C_SDA_PIN, ARM_I2C_SCL_PIN);
+    Wire.setClock(400000);
 
-  if (!isInitialized) {
-    isInitialized = true;
-    // Initial position
-    rover_servo_write(axisToServo[ARM_AXIS_1], 1900, true);
-    rover_servo_write(axisToServo[ARM_AXIS_2], 1600, true);
-    rover_servo_write(axisToServo[ARM_AXIS_3], 1200, true);
-    rover_servo_write(axisToServo[ARM_AXIS_4], 1200, true);
-    rover_servo_write(axisToServo[ARM_AXIS_5], 1500, true);
-    rover_servo_write(axisToServo[ARM_AXIS_6], 1500, true);
-  }
+    // Initialize low-level PCA9685 driver and updater task
+    arm_servo_init();
+
+    // Smoothly position arm to calibrated Home positions {1900, 1600, 1200, 1200, 1500, 1500}
+    arm_home(ARM_SPEED_DEFAULT);
 }
 
-void arm_move_axis_us(ArmAxis axisNum, uint16_t pos, uint8_t speed)
-{
-  rover_servo_move(axisToServo[axisNum], pos, speed);
+void arm_home(uint8_t speed) {
+    for (uint8_t i = 0; i < ARM_NUM_JOINTS; i++) {
+        arm_set_joint_us(static_cast<ArmJointId>(i), ARM_HOME_POS_US[i], speed);
+    }
 }
 
-void arm_move(ArmAxis axisNum, uint16_t x, uint16_t y, uint16_t z)
-{
-  // TODO math
+void arm_rest(uint8_t speed) {
+    for (uint8_t i = 0; i < ARM_NUM_JOINTS; i++) {
+        arm_set_joint_us(static_cast<ArmJointId>(i), ARM_REST_POS_US[i], speed);
+    }
 }
 
-void arm_pause(ArmAxis axisNum)
-{
-  rover_servo_pause(axisToServo[axisNum]);
+void arm_emergency_stop(void) {
+    arm_servo_emergency_stop();
 }
 
-void arm_resume(ArmAxis axisNum)
-{
-  rover_servo_resume(axisToServo[axisNum]);
+void arm_set_joint_us(ArmJointId joint, uint16_t us, uint8_t speed) {
+    if (joint >= ARM_NUM_JOINTS) {
+        return;
+    }
+    uint16_t clamped_us = clamp_joint_pulse(joint, us);
+    arm_servo_move_to_us(static_cast<uint8_t>(joint), clamped_us, speed);
 }
 
+void arm_set_joint_deg(ArmJointId joint, float deg, uint8_t speed) {
+    if (joint >= ARM_NUM_JOINTS) {
+        return;
+    }
+    uint16_t us = angle_to_pulse(joint, deg);
+    arm_set_joint_us(joint, us, speed);
+}
+
+void arm_jog(ArmJointId joint, int8_t direction, uint8_t speed) {
+    if (joint >= ARM_NUM_JOINTS) {
+        return;
+    }
+    if (direction > 0) {
+        arm_servo_move_to_us(static_cast<uint8_t>(joint), DEFAULT_JOINT_LIMITS[joint].max_us, speed);
+    } else if (direction < 0) {
+        arm_servo_move_to_us(static_cast<uint8_t>(joint), DEFAULT_JOINT_LIMITS[joint].min_us, speed);
+    } else {
+        arm_pause(joint);
+    }
+}
+
+void arm_pause(ArmJointId joint) {
+    if (joint >= ARM_NUM_JOINTS) {
+        return;
+    }
+    arm_servo_pause(static_cast<uint8_t>(joint));
+}
+
+uint16_t arm_get_joint_us(ArmJointId joint) {
+    if (joint >= ARM_NUM_JOINTS) {
+        return 1500;
+    }
+    return arm_servo_get_current_us(static_cast<uint8_t>(joint));
+}
+
+float arm_get_joint_deg(ArmJointId joint) {
+    if (joint >= ARM_NUM_JOINTS) {
+        return 0.0f;
+    }
+    uint16_t us = arm_servo_get_current_us(static_cast<uint8_t>(joint));
+    return pulse_to_angle(joint, us);
+}
+
+void arm_get_all_us(uint16_t positions[ARM_NUM_JOINTS]) {
+    for (uint8_t i = 0; i < ARM_NUM_JOINTS; i++) {
+        positions[i] = arm_servo_get_current_us(i);
+    }
+}
