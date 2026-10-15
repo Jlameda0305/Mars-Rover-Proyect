@@ -1,58 +1,49 @@
-# Esquemas de Ingeniería y Diagramas de Conexión: Mars Rover (Direct GPIO)
+# Esquemas de Ingeniería y Diagramas de Conexión: Mars Rover (L298N Skid-Steering)
 
-Este documento reúne el conjunto completo de planos esquemáticos técnicos de ingeniería para el Mars Rover, diseñados bajo estándar CAD/norma técnica con cuadrícula de coordenadas, código de colores ortogonales y bloques de rotulación.
-
----
-
-## 1. Esquema 1: Conexión y Control de Señales (ESP32 Direct GPIO)
-
-Control directo de los 6 actuadores (2 ESCs de tracción y 4 servomotores MG996R de dirección) sin módulo PCA9685, empleando los temporizadores de hardware PWM (LEDC) del ESP32.
-
-![Diagrama General del Circuito](/home/jlameda/.gemini/antigravity/brain/e3db32e4-bfca-4eef-84a5-4d985584dddd/schematic_circuit_diagram.png)
-
-- **Archivos fuente:** [`docs/schematic_circuit_diagram.svg`](file:///home/jlameda/Documents/Mars-Rover-Proyect/docs/schematic_circuit_diagram.svg) | [PNG](file:///home/jlameda/Documents/Mars-Rover-Proyect/docs/schematic_circuit_diagram.png) | [PDF](file:///home/jlameda/Documents/Mars-Rover-Proyect/docs/schematic_circuit_diagram.pdf)
-
-### Mapeo de Señales (Pinout)
-| Componente | Designador | Pin ESP32 | Color de Línea | Función Técnica |
-| :--- | :---: | :---: | :---: | :--- |
-| **ESC Motor Izquierdo** | **M1** | **GPIO 17** | Azul (`#2980B9`) | Control PWM Tracción Izquierda (3 motores en paralelo) |
-| **ESC Motor Derecho** | **M2** | **GPIO 13** | Naranja (`#D35400`) | Control PWM Tracción Derecha (3 motores en paralelo) |
-| **Servo Delantero Izquierdo** | **S1** | **GPIO 18** | Verde (`#27AE60`) | Dirección rueda delantera izquierda |
-| **Servo Delantero Derecho** | **S2** | **GPIO 19** | Verde Azulado (`#16A085`) | Dirección rueda delantera derecha |
-| **Servo Trasero Izquierdo** | **S3** | **GPIO 21** | Púrpura (`#8E44AD`) | Dirección rueda trasera izquierda (Ackermann contrafase) |
-| **Servo Trasero Derecho** | **S4** | **GPIO 22** | Magenta (`#9B59B6`) | Dirección rueda trasera derecha (Ackermann contrafase) |
+Este documento reúne el conjunto completo de especificaciones técnicas y esquemáticos de ingeniería para el Mars Rover con tracción diferencial (**Skid-Steering**) empleando un controlador puente H dual **L298N** para 4 motores DC, sin servomotores.
 
 ---
 
-## 2. Esquema 2: Subsistema de Tracción 6x6 (2 ESCs + 6 Motores DC)
+## 1. Esquema 1: Conexión y Control de Señales (ESP32 -> Puente H L298N)
 
-Diagrama de cableado detallado para los 6 motores DC de tracción. Muestra cómo los 3 motores del costado izquierdo y los 3 motores del costado derecho se ramifican en paralelo hacia las salidas de potencia `M+` y `M-` de sus respectivos ESCs bidireccionales.
+Control directo del módulo L298N mediante 6 líneas de control desde el ESP32: 2 canales PWM por hardware (LEDC) para control de velocidad y 4 pines GPIO digitales para selección de sentido de giro.
 
-![Diagrama Tracción Motores](/home/jlameda/.gemini/antigravity/brain/e3db32e4-bfca-4eef-84a5-4d985584dddd/schematic_motors_traction.png)
-
-- **Archivos fuente:** [`docs/schematic_motors_traction.svg`](file:///home/jlameda/Documents/Mars-Rover-Proyect/docs/schematic_motors_traction.svg) | [PNG](file:///home/jlameda/Documents/Mars-Rover-Proyect/docs/schematic_motors_traction.png) | [PDF](file:///home/jlameda/Documents/Mars-Rover-Proyect/docs/schematic_motors_traction.pdf)
-
-### Especificación de Cableado de Motores:
-1. **Conexión en Paralelo:** 
-   - **Banco Izquierdo:** Motores FL (Delantero Izq), ML (Medio Izq) y BL (Trasero Izq) van conectados juntos al ESC 1 (`M+` y `M-`).
-   - **Banco Derecho:** Motores FR (Delantero Der), MR (Medio Der) y BR (Trasero Der) van conectados juntos al ESC 2 (`M+` y `M-`).
-2. **Regla de Inversión de Giro:** Si alguna rueda gira en sentido opuesto al resto del vehículo al avanzar, basta con intercambiar sus dos cables directamente en los bornes de ese motor específico.
-3. **Control y Señal:** Los ESCs reciben señal PWM estándar de 50 Hz (1000 µs = reversa máxima, 1500 µs = neutro/freno, 2000 µs = avance máximo).
+### Mapeo de Señales (Pinout ESP32 -> L298N)
+| Pin ESP32 | Terminal L298N | Color de Línea | Función Técnica | Estado Previo |
+| :---: | :---: | :---: | :--- | :--- |
+| **GPIO 17** | **ENA** | Azul (`#2980B9`) | PWM Velocidad - Tren Izquierdo (Canal LEDC 0, 1 kHz) | ESC Izquierdo |
+| **GPIO 18** | **IN1** | Verde (`#27AE60`) | Dirección Lógica A - Tren Izquierdo | Servo Delantero Izq. |
+| **GPIO 19** | **IN2** | Amarillo (`#F1C40F`) | Dirección Lógica B - Tren Izquierdo | Servo Delantero Der. |
+| **GPIO 21** | **IN3** | Púrpura (`#8E44AD`) | Dirección Lógica A - Tren Derecho | Servo Trasero Izq. |
+| **GPIO 22** | **IN4** | Magenta (`#9B59B6`) | Dirección Lógica B - Tren Derecho | Servo Trasero Der. |
+| **GPIO 13** | **ENB** | Naranja (`#D35400`) | PWM Velocidad - Tren Derecho (Canal LEDC 1, 1 kHz) | ESC Derecho |
 
 ---
 
-## 3. Esquema 3: Distribución de Energía y Doble Riel (Batería, UBEC y GND)
+## 2. Esquema 2: Subsistema de Motores DC (4WD en Tracción Diferencial)
 
-Arquitectura de alimentación eléctrica desacoplada con doble riel para proteger la lógica de control frente a caídas de tensión y ruido inductivo de los motores.
+Los 4 motores DC se configuran en dos pares laterales conectados en paralelo a las salidas de potencia del L298N:
+* **Canal A (OUT1 / OUT2):** Conecta en paralelo los dos motores del costado izquierdo (Delantero Izquierdo y Trasero Izquierdo).
+* **Canal B (OUT3 / OUT4):** Conecta en paralelo los dos motores del costado derecho (Delantero Derecho y Trasero Derecho).
 
-![Diagrama Fuente de Alimentación](/home/jlameda/.gemini/antigravity/brain/e3db32e4-bfca-4eef-84a5-4d985584dddd/schematic_power_supply.png)
+### Tabla de Verdad L298N y Movimiento del Rover:
+| Maniobra | IN1 | IN2 | ENA (PWM) | IN3 | IN4 | ENB (PWM) | Efecto Cinemático |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| **Avance Recto** | `HIGH` | `LOW` | $V$ | `HIGH` | `LOW` | $V$ | Ambos laterales avanzan a la misma velocidad |
+| **Retroceso Recto** | `LOW` | `HIGH` | $V$ | `LOW` | `HIGH` | $V$ | Ambos laterales retroceden a la misma velocidad |
+| **Giro Derecha (Curva)** | `HIGH` | `LOW` | $V_{\text{alto}}$ | `HIGH` | `LOW` | $V_{\text{bajo}}$ | Tren izquierdo más rápido que el derecho |
+| **Giro Izquierda (Curva)** | `HIGH` | `LOW` | $V_{\text{bajo}}$ | `HIGH` | `LOW` | $V_{\text{alto}}$ | Tren derecho más rápido que el izquierdo |
+| **Spin 360° Horario** | `HIGH` | `LOW` | $V$ | `LOW` | `HIGH` | $V$ | Izquierda avance, derecha reversa (giro sobre eje) |
+| **Spin 360° Antihorario**| `LOW` | `HIGH` | $V$ | `HIGH` | `LOW` | $V$ | Izquierda reversa, derecha avance (giro sobre eje) |
+| **Freno / Parada** | `LOW` | `LOW` | $0$ | `LOW` | `LOW` | $0$ | Desconexión por inercia o parada activa |
 
-- **Archivos fuente:** [`docs/schematic_power_supply.svg`](file:///home/jlameda/Documents/Mars-Rover-Proyect/docs/schematic_power_supply.svg) | [PNG](file:///home/jlameda/Documents/Mars-Rover-Proyect/docs/schematic_power_supply.png) | [PDF](file:///home/jlameda/Documents/Mars-Rover-Proyect/docs/schematic_power_supply.pdf)
+---
 
-### Reglas Críticas de Energía:
-1. **Topología de Doble Riel:**
-   - **Riel de Potencia (+7.4V Batería):** Alimenta directamente los 2 ESCs de tracción a través del interruptor y fusible de 20A.
-   - **Riel Regulado (+5.0V / 5A UBEC):** Alimenta exclusivamente a los 4 servomotores MG996R y al pin `5V / VIN` del ESP32.
-2. **Bus de Masa Común en Estrella (GND):**
-   - Todos los retornos de masa (Batería `-`, UBEC `GND`, ESP32 `GND`, ESCs `GND`, Servos `GND`) se conectan a un único punto central de tierra para eliminar bucles de masa (*ground loops*) e interferencias electromagnéticas (EMI).
-3. **Protección:** Fusible automotriz de 20A instalado inmediatamente tras el terminal positivo de la batería LiPo.
+## 3. Esquema 3: Distribución de Energía (Batería, L298N y ESP32)
+
+1. **Alimentación de Motores (+7.4V / +12V):**
+   - Terminal `+12V` / `VCC` del L298N conectado al positivo de la batería tras interruptor de encendido.
+2. **GND Común:**
+   - Terminal `GND` de la batería, terminal `GND` del L298N y terminal `GND` del ESP32 conectados al mismo bus de masa común.
+3. **Regulación Lógica 5V:**
+   - El L298N cuenta con regulador interno de 5V (habilitado con el jumper de 5V-EN activado). Su salida de 5V puede alimentar el pin `VIN` / `5V` del ESP32 cuando se usa batería de 7.4V - 12V.

@@ -1,3 +1,2 @@
 # Wokwi Web Library Dependencies
-ESP32Servo
 WebSockets

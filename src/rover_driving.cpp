@@ -1,89 +1,100 @@
-#include "esp_system.h"
+#include "Arduino.h"
 #include "rover_driving.h"
 #include "rover_kinematics.h"
 #include "rover_config.h"
-#include "rover_servo.h"
-#include <ESP32Servo.h>
 
-enum MotorDirection {
-  MOTOR_IDLE,
-  MOTOR_FORWARD,
-  MOTOR_BACKWARD
-};
-
-static Servo motors_left;
-static Servo motors_right;
-
-static MotorDirection motor_state = MOTOR_IDLE;
 static RoverMode current_rover_mode = DRIVE_TURN_NORMAL;
 
-void rover_driving_init(void)
-{
-    motors_left.attach(ROVER_MOTORS_LEFT_PIN);
-    motors_left.writeMicroseconds(RC_CENTER);
-    motors_right.attach(ROVER_MOTORS_RIGHT_PIN);
-    motors_right.writeMicroseconds(RC_CENTER);
-
-    // Steering servos
-    rover_servo_write(SERVO_FRONT_LEFT, RC_CENTER);
-    rover_servo_write(SERVO_FRONT_RIGHT, RC_CENTER);
-    rover_servo_write(SERVO_BACK_LEFT, RC_CENTER);
-    rover_servo_write(SERVO_BACK_RIGHT, RC_CENTER);
+static void write_pwm_left(uint8_t duty) {
+#if defined(ESP_ARDUINO_VERSION_MAJOR) && ESP_ARDUINO_VERSION_MAJOR >= 3
+    ledcWrite(ROVER_L298N_ENA_PIN, duty);
+#else
+    ledcWrite(L298N_PWM_CHANNEL_LEFT, duty);
+#endif
 }
 
-static void setMotorInReverseMode(Servo &motor) {
-  motor.writeMicroseconds(1400);
-  delay(100);
-  motor.writeMicroseconds(RC_CENTER);
-  delay(100);
+static void write_pwm_right(uint8_t duty) {
+#if defined(ESP_ARDUINO_VERSION_MAJOR) && ESP_ARDUINO_VERSION_MAJOR >= 3
+    ledcWrite(ROVER_L298N_ENB_PIN, duty);
+#else
+    ledcWrite(L298N_PWM_CHANNEL_RIGHT, duty);
+#endif
 }
 
-void rover_driving_set_drive_mode(RoverMode mode)
-{
+static void apply_l298n_left(uint8_t pwm, MotorDirection dir) {
+    if (dir == MOTOR_FORWARD) {
+        digitalWrite(ROVER_L298N_IN1_PIN, HIGH);
+        digitalWrite(ROVER_L298N_IN2_PIN, LOW);
+    } else if (dir == MOTOR_BACKWARD) {
+        digitalWrite(ROVER_L298N_IN1_PIN, LOW);
+        digitalWrite(ROVER_L298N_IN2_PIN, HIGH);
+    } else {
+        digitalWrite(ROVER_L298N_IN1_PIN, LOW);
+        digitalWrite(ROVER_L298N_IN2_PIN, LOW);
+        pwm = 0;
+    }
+    write_pwm_left(pwm);
+}
+
+static void apply_l298n_right(uint8_t pwm, MotorDirection dir) {
+    if (dir == MOTOR_FORWARD) {
+        digitalWrite(ROVER_L298N_IN3_PIN, HIGH);
+        digitalWrite(ROVER_L298N_IN4_PIN, LOW);
+    } else if (dir == MOTOR_BACKWARD) {
+        digitalWrite(ROVER_L298N_IN3_PIN, LOW);
+        digitalWrite(ROVER_L298N_IN4_PIN, HIGH);
+    } else {
+        digitalWrite(ROVER_L298N_IN3_PIN, LOW);
+        digitalWrite(ROVER_L298N_IN4_PIN, LOW);
+        pwm = 0;
+    }
+    write_pwm_right(pwm);
+}
+
+void rover_driving_init(void) {
+    // Direction GPIO pins for Left H-bridge
+    pinMode(ROVER_L298N_IN1_PIN, OUTPUT);
+    pinMode(ROVER_L298N_IN2_PIN, OUTPUT);
+    digitalWrite(ROVER_L298N_IN1_PIN, LOW);
+    digitalWrite(ROVER_L298N_IN2_PIN, LOW);
+
+    // Direction GPIO pins for Right H-bridge
+    pinMode(ROVER_L298N_IN3_PIN, OUTPUT);
+    pinMode(ROVER_L298N_IN4_PIN, OUTPUT);
+    digitalWrite(ROVER_L298N_IN3_PIN, LOW);
+    digitalWrite(ROVER_L298N_IN4_PIN, LOW);
+
+    // Hardware PWM (LEDC) for speed control
+#if defined(ESP_ARDUINO_VERSION_MAJOR) && ESP_ARDUINO_VERSION_MAJOR >= 3
+    ledcAttach(ROVER_L298N_ENA_PIN, L298N_PWM_FREQ, L298N_PWM_RESOLUTION);
+    ledcAttach(ROVER_L298N_ENB_PIN, L298N_PWM_FREQ, L298N_PWM_RESOLUTION);
+#else
+    ledcSetup(L298N_PWM_CHANNEL_LEFT, L298N_PWM_FREQ, L298N_PWM_RESOLUTION);
+    ledcAttachPin(ROVER_L298N_ENA_PIN, L298N_PWM_CHANNEL_LEFT);
+
+    ledcSetup(L298N_PWM_CHANNEL_RIGHT, L298N_PWM_FREQ, L298N_PWM_RESOLUTION);
+    ledcAttachPin(ROVER_L298N_ENB_PIN, L298N_PWM_CHANNEL_RIGHT);
+#endif
+
+    rover_driving_stop();
+}
+
+void rover_driving_set_drive_mode(RoverMode mode) {
     current_rover_mode = mode;
 }
 
-void rover_driving_move(uint16_t signal) {
-  MotorOutputs outputs;
-  if (current_rover_mode == DRIVE_TURN_NORMAL) {
-    outputs = calculate_motors(DRIVE_TURN_NORMAL, signal, RC_CENTER);
-    if (outputs.left < RC_CENTER && outputs.left > 0) {
-      if (motor_state == MOTOR_IDLE) {
-        setMotorInReverseMode(motors_left);
-        setMotorInReverseMode(motors_right);
-        motor_state = MOTOR_BACKWARD;
-      }
-    } else if (outputs.left > RC_CENTER) {
-      motor_state = MOTOR_FORWARD;
-    } else {
-      motor_state = MOTOR_IDLE;
-    }
-  } else if (current_rover_mode == DRIVE_TURN_SPIN) {
-    // In spin mode, signal is steering/volante signal
-    outputs = calculate_motors(DRIVE_TURN_SPIN, RC_CENTER, signal);
-    if (outputs.left < RC_CENTER && outputs.left > 0) {
-      if (motor_state == MOTOR_IDLE) {
-        setMotorInReverseMode(motors_left);
-        motor_state = MOTOR_FORWARD;
-      }
-    } else if (outputs.right < RC_CENTER && outputs.right > 0) {
-      if (motor_state == MOTOR_IDLE) {
-        setMotorInReverseMode(motors_right);
-        motor_state = MOTOR_FORWARD;
-      }
-    } else {
-      motor_state = MOTOR_IDLE;
-    }
-  }
-
-  motors_left.writeMicroseconds(outputs.left);
-  motors_right.writeMicroseconds(outputs.right);
+void rover_driving_move(uint16_t throttle_signal, uint16_t steer_signal) {
+    MotorOutputs outputs = calculate_motors(current_rover_mode, throttle_signal, steer_signal);
+    apply_l298n_left(outputs.left_pwm, outputs.left_dir);
+    apply_l298n_right(outputs.right_pwm, outputs.right_dir);
 }
 
-void rover_driving_steer(uint16_t signal) {
-  SteeringAngles angles = calculate_steering(current_rover_mode, signal);
-  rover_servo_write(SERVO_FRONT_LEFT, angles.front_left);
-  rover_servo_write(SERVO_FRONT_RIGHT, angles.front_right);
-  rover_servo_write(SERVO_BACK_LEFT, angles.back_left);
-  rover_servo_write(SERVO_BACK_RIGHT, angles.back_right);
+void rover_driving_steer(uint16_t steer_signal) {
+    // In differential drive, steering is applied synchronously in rover_driving_move.
+    (void)steer_signal;
+}
+
+void rover_driving_stop(void) {
+    apply_l298n_left(0, MOTOR_STOP);
+    apply_l298n_right(0, MOTOR_STOP);
 }

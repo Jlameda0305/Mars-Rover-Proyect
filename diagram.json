@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "author": "Mars Rover Project",
+  "author": "Mars Rover Project (L298N Skid-Steering)",
   "editor": "wokwi",
   "parts": [
     {
@@ -11,69 +11,69 @@
       "attrs": {}
     },
     {
-      "type": "wokwi-servo",
-      "id": "esc_l",
-      "top": -140,
+      "type": "wokwi-led",
+      "id": "led_pwm_l",
+      "top": -170,
       "left": 260,
-      "attrs": { "hornColor": "blue" }
+      "attrs": { "color": "blue", "label": "ENA (Left PWM)" }
     },
     {
-      "type": "wokwi-servo",
-      "id": "esc_r",
-      "top": 140,
+      "type": "wokwi-led",
+      "id": "led_fwd_l",
+      "top": -110,
       "left": 260,
-      "attrs": { "hornColor": "orange" }
+      "attrs": { "color": "green", "label": "IN1 (Left FWD)" }
     },
     {
-      "type": "wokwi-servo",
-      "id": "srv_fl",
-      "top": -260,
-      "left": 460,
-      "attrs": { "hornColor": "green" }
+      "type": "wokwi-led",
+      "id": "led_rev_l",
+      "top": -50,
+      "left": 260,
+      "attrs": { "color": "red", "label": "IN2 (Left REV)" }
     },
     {
-      "type": "wokwi-servo",
-      "id": "srv_fr",
-      "top": -100,
-      "left": 460,
-      "attrs": { "hornColor": "green" }
+      "type": "wokwi-led",
+      "id": "led_fwd_r",
+      "top": 50,
+      "left": 260,
+      "attrs": { "color": "green", "label": "IN3 (Right FWD)" }
     },
     {
-      "type": "wokwi-servo",
-      "id": "srv_bl",
-      "top": 60,
-      "left": 460,
-      "attrs": { "hornColor": "magenta" }
+      "type": "wokwi-led",
+      "id": "led_rev_r",
+      "top": 110,
+      "left": 260,
+      "attrs": { "color": "red", "label": "IN4 (Right REV)" }
     },
     {
-      "type": "wokwi-servo",
-      "id": "srv_br",
-      "top": 220,
-      "left": 460,
-      "attrs": { "hornColor": "magenta" }
+      "type": "wokwi-led",
+      "id": "led_pwm_r",
+      "top": 170,
+      "left": 260,
+      "attrs": { "color": "orange", "label": "ENB (Right PWM)" }
     }
   ],
   "connections": [
     [ "esp:TX", "$serialMonitor:RX", "green", [] ],
     [ "esp:RX", "$serialMonitor:TX", "yellow", [] ],
-    [ "esp:17", "esc_l:PWM", "blue", [ "h20", "v-80" ] ],
-    [ "esp:5V", "esc_l:V+", "red", [ "h30", "v-100" ] ],
-    [ "esp:GND.1", "esc_l:GND", "black", [ "h10", "v-60" ] ],
-    [ "esp:13", "esc_r:PWM", "orange", [ "h20", "v80" ] ],
-    [ "esp:5V", "esc_r:V+", "red", [ "h30", "v100" ] ],
-    [ "esp:GND.2", "esc_r:GND", "black", [ "h10", "v60" ] ],
-    [ "esp:18", "srv_fl:PWM", "green", [ "h40", "v-140" ] ],
-    [ "esp:5V", "srv_fl:V+", "red", [ "h40", "v-160" ] ],
-    [ "esp:GND.1", "srv_fl:GND", "black", [ "h20", "v-120" ] ],
-    [ "esp:19", "srv_fr:PWM", "green", [ "h50", "v-60" ] ],
-    [ "esp:5V", "srv_fr:V+", "red", [ "h50", "v-80" ] ],
-    [ "esp:GND.1", "srv_fr:GND", "black", [ "h30", "v-40" ] ],
-    [ "esp:21", "srv_bl:PWM", "magenta", [ "h40", "v40" ] ],
-    [ "esp:5V", "srv_bl:V+", "red", [ "h40", "v60" ] ],
-    [ "esp:GND.2", "srv_bl:GND", "black", [ "h20", "v20" ] ],
-    [ "esp:22", "srv_br:PWM", "magenta", [ "h50", "v120" ] ],
-    [ "esp:5V", "srv_br:V+", "red", [ "h50", "v140" ] ],
-    [ "esp:GND.2", "srv_br:GND", "black", [ "h30", "v100" ] ]
+
+    [ "esp:17", "led_pwm_l:A", "blue", [ "h20", "v-140" ] ],
+    [ "esp:GND.1", "led_pwm_l:C", "black", [ "h15", "v-120" ] ],
+
+    [ "esp:18", "led_fwd_l:A", "green", [ "h30", "v-80" ] ],
+    [ "esp:GND.1", "led_fwd_l:C", "black", [ "h20", "v-60" ] ],
+
+    [ "esp:19", "led_rev_l:A", "red", [ "h40", "v-30" ] ],
+    [ "esp:GND.1", "led_rev_l:C", "black", [ "h25", "v-10" ] ],
+
+    [ "esp:21", "led_fwd_r:A", "green", [ "h40", "v30" ] ],
+    [ "esp:GND.2", "led_fwd_r:C", "black", [ "h25", "v10" ] ],
+
+    [ "esp:22", "led_rev_r:A", "red", [ "h30", "v80" ] ],
+    [ "esp:GND.2", "led_rev_r:C", "black", [ "h20", "v60" ] ],
+
+    [ "esp:13", "led_pwm_r:A", "orange", [ "h20", "v140" ] ],
+    [ "esp:GND.2", "led_pwm_r:C", "black", [ "h15", "v120" ] ]
   ],
   "serialMonitor": {
     "display": "always",

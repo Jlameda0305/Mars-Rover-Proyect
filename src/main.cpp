@@ -10,7 +10,6 @@
 #include <esp_log.h>
 #include "rover_config.h"
 #include "wifi_controller.h"
-#include "rover_servo.h"
 #include "rover_driving.h"
 #include "rover_kinematics.h"
 
@@ -87,6 +86,9 @@ static void process_serial_commands() {
             serial_steer = 1800;
             serial_mode = DRIVE_TURN_SPIN;
             Serial.println("[CMD_ACK] SPIN 360: Mode SPIN, Steer 1800 us");
+        } else if (c == 'T') { // Run Self-Test
+            Serial.println("[CMD_ACK] RUNNING SELF-TEST...");
+            run_rover_kinematics_self_test();
         } else if (line.startsWith("CMD:")) {
             int comma1 = line.indexOf(',');
             int comma2 = line.indexOf(',', comma1 + 1);
@@ -114,9 +116,11 @@ void setup() {
     Serial.println(" Commands: F, B, L, R, S, P");
     Serial.println("=================================");
 
-    rover_servo_init();
     rover_driving_init();
     handle_controller_disconnected(0);
+
+    // Run built-in kinematics verification
+    run_rover_kinematics_self_test();
 
     wifi_controller_init("Rover", NULL, WIFI_CONTROLLER_AP);
     wifi_controller_register_connection_callback(&handle_wifi_controller_status);
@@ -150,15 +154,11 @@ void loop() {
         rover_driving_set_drive_mode(current_rover_mode);
     }
 
-    uint16_t motor_signal = RC_CENTER;
-    if (current_rover_mode == DRIVE_TURN_NORMAL) {
-        motor_signal = filter_signal(rc_values[RC_MOTOR_CHANNEL]);
-    } else if (current_rover_mode == DRIVE_TURN_SPIN) {
-        motor_signal = filter_signal(rc_values[RC_STEER_CHANNEL]);
-    }
+    uint16_t motor_signal = filter_signal(rc_values[RC_MOTOR_CHANNEL]);
+    uint16_t steer_signal = filter_signal(rc_values[RC_STEER_CHANNEL]);
 
-    rover_driving_move(motor_signal);
-    rover_driving_steer(filter_signal(rc_values[RC_STEER_CHANNEL]));
+    // Differential Skid-Steering: pass both throttle and steer signals
+    rover_driving_move(motor_signal, steer_signal);
 
     uint32_t now = millis();
     if (now - last_telemetry_ms >= 1000) {
@@ -166,7 +166,7 @@ void loop() {
         Serial.printf("[TELEMETRY] Mode: %s | Motor: %u us | Steer: %u us\n",
                       (current_rover_mode == DRIVE_TURN_SPIN ? "SPIN" : "NORMAL"),
                       motor_signal,
-                      filter_signal(rc_values[RC_STEER_CHANNEL]));
+                      steer_signal);
     }
 
     rc_value_index = (rc_value_index + 1) % RC_FILTER_SAMPLES;

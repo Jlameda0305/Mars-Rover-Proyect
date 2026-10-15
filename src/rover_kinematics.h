@@ -14,32 +14,23 @@
 #define RC_HIGH 2000
 #endif
 
-#ifndef SERVOMIN
-#define SERVOMIN 250
-#endif
-#ifndef SERVOMAX
-#define SERVOMAX 500
-#endif
-#ifndef SERVOMIN_FULL_RANGE
-#define SERVOMIN_FULL_RANGE 150
-#endif
-#ifndef SERVOMAX_FULL_RANGE
-#define SERVOMAX_FULL_RANGE 600
-#endif
-
-struct SteeringAngles {
-    uint16_t front_left;
-    uint16_t front_right;
-    uint16_t back_left;
-    uint16_t back_right;
-};
+typedef enum MotorDirection {
+    MOTOR_STOP = 0,
+    MOTOR_FORWARD = 1,
+    MOTOR_BACKWARD = 2
+} MotorDirection;
 
 struct MotorOutputs {
-    uint16_t left;
-    uint16_t right;
+    uint16_t left;          // RC us value [1000..2000] (legacy / telemetry compatibility)
+    uint16_t right;         // RC us value [1000..2000] (legacy / telemetry compatibility)
+    int16_t left_speed;     // Normalized speed: -500 (full reverse) to +500 (full forward), 0 = stop
+    int16_t right_speed;    // Normalized speed: -500 to +500
+    uint8_t left_pwm;       // 0 to 255 (duty cycle for L298N ENA)
+    uint8_t right_pwm;      // 0 to 255 (duty cycle for L298N ENB)
+    MotorDirection left_dir;   // Direction for L298N IN1, IN2
+    MotorDirection right_dir;  // Direction for L298N IN3, IN4
 };
 
-SteeringAngles calculate_steering(RoverMode mode, uint16_t steer_signal);
 MotorOutputs calculate_motors(RoverMode mode, uint16_t throttle_signal, uint16_t steer_signal);
 uint16_t filter_rc_signal(const uint16_t* samples, uint8_t sample_count);
-uint16_t calculate_servo_ticks(uint8_t servo_id, uint16_t us_signal, int16_t offset);
+bool run_rover_kinematics_self_test(void);

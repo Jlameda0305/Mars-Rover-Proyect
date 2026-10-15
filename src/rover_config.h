@@ -29,33 +29,35 @@
 #define RC_HEAD_YAW_CHANNEL   RC_CH3
 #define RC_HEAD_PITCH_CHANNEL RC_CH4
 
-#define RC_SERVO1_CHANNEL RC_CH1
-#define RC_SERVO2_CHANNEL RC_CH2
-#define RC_SERVO3_CHANNEL RC_CH4
-#define RC_SERVO4_CHANNEL RC_CH3
-#define RC_SERVO5_CHANNEL RC_CH1
-#define RC_SERVO6_CHANNEL RC_CH2
-
 #define RC_ROVER_MODE_ROVER_CHANNEL RC_CH5
 #define RC_ARM_MODE_ROVER_CHANNEL   RC_CH6
 
-
 #define ARM_NUM_AXIS 6
 
-#define ROVER_MOTORS_LEFT_PIN        17
-#define ROVER_MOTORS_RIGHT_PIN       13
-#define ROVER_SERVO_FRONT_LEFT_PIN   18
-#define ROVER_SERVO_FRONT_RIGHT_PIN  19
-#define ROVER_SERVO_BACK_LEFT_PIN    21
-#define ROVER_SERVO_BACK_RIGHT_PIN   22
+// ============================================================================
+// L298N DUAL H-BRIDGE MOTOR DRIVER PINS (4 DC MOTORS)
+// ============================================================================
+// Left Motors (OUT1 & OUT2 in parallel)
+#define ROVER_L298N_ENA_PIN        17    // PWM Speed Control (LEDC Channel 0)
+#define ROVER_L298N_IN1_PIN        18    // Direction Pin 1
+#define ROVER_L298N_IN2_PIN        19    // Direction Pin 2
 
-#define ROVER_SETTINGS_SWITCH_1     2
-#define ROVER_SETTINGS_SWITCH_2     23
+// Right Motors (OUT3 & OUT4 in parallel)
+#define ROVER_L298N_IN3_PIN        21    // Direction Pin 3
+#define ROVER_L298N_IN4_PIN        22    // Direction Pin 4
+#define ROVER_L298N_ENB_PIN        13    // PWM Speed Control (LEDC Channel 1)
 
-// Offset used in rover_servo to make 
-#define SERVO_FRONT_LEFT_OFFSET     (+20)
-#define SERVO_FRONT_RIGHT_OFFSET    (-15)
-#define SERVO_BACK_LEFT_OFFSET      (+5)
-#define SERVO_BACK_RIGHT_OFFSET     (-25)
+// Backward compatibility alias definitions
+#define ROVER_MOTORS_LEFT_PIN      ROVER_L298N_ENA_PIN
+#define ROVER_MOTORS_RIGHT_PIN     ROVER_L298N_ENB_PIN
+
+// PWM Hardware Configuration (LEDC on ESP32)
+#define L298N_PWM_FREQ             1000  // 1 kHz (smooth operation for L298N)
+#define L298N_PWM_RESOLUTION       8     // 8-bit resolution (0 - 255)
+#define L298N_PWM_CHANNEL_LEFT     0
+#define L298N_PWM_CHANNEL_RIGHT    1
+
+#define ROVER_SETTINGS_SWITCH_1    2
+#define ROVER_SETTINGS_SWITCH_2    23
 
 const uint16_t config_default_ch_values[RC_NUM_CHANNELS] = { RC_CENTER, RC_CENTER, RC_CENTER, RC_CENTER, RC_LOW, RC_CENTER };
