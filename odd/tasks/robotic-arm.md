@@ -50,11 +50,11 @@ Garantizar que el sistema sea:
   - *Commit:* `70b5230`
   - *RDD Assess:* `unavailable` (runtime 'antigravity').
 
-- [ ] **TASK-03:** Adaptación de la Capa de Hardware Embebida (`arm_servo.cpp`, `arm.cpp`, `main.cpp`) y Eliminación de Módulos No Relacionados
+- [x] **TASK-03:** Adaptación de la Capa de Hardware Embebida (`arm_servo.cpp`, `arm.cpp`, `main.cpp`) y Eliminación de Módulos No Relacionados
   - *Ruta:* Delegada (Writer Trigger)
-  - *Evidencia esperada:* Eliminación de módulos de tracción/dirección/cabeza/LoRa/RMT, `platformio.ini` limpio, y `main.cpp` configurado para arranque autónomo del brazo.
-  - *Commit:* Conventional commit en rama `feature/robotic-arm`.
-  - *RDD Assess:* Pendiente de commit.
+  - *Evidencia observada:* Eliminación de los 16 archivos de subsistemas ajenos al brazo (`rover_driving`, `rover_head`, `gyro_accel_sensor`, `rc_receiver_rmt`, `lora_controller`, `rover_settings_switch`, `switch_checker`, `rover_servo`). Implementación de `arm_servo.h/.cpp` con control thread-safe FreeRTOS del driver PCA9685 y tarea de fondo `ArmServoUpdater` a 10ms con `calculate_step`. Refactorización de `arm.h/.cpp` con API de alto nivel y compatibilidad previa. `main.cpp` limpio arrancando directamente el brazo a HOME y WiFi AP "Robotic-Arm" (192.168.4.5) con parada de emergencia ante desconexión. `platformio.ini` depurado con solo dependencias de PCA9685 y AsyncWebServer. Suite de pruebas nativas pasando 100%.
+  - *Commit:* `4a4b58b`
+  - *RDD Assess:* `unavailable` (runtime 'antigravity').
 
 - [ ] **TASK-04:** Protocolo de Comunicación y Dashboard Web Dedicado (`wifi_controller.cpp`, `data/index.html`)
   - *Ruta:* Delegada (Writer Trigger)
@@ -73,6 +73,7 @@ Garantizar que el sistema sea:
 ## 4. Registro de Verificación y Evidencias
 - *TASK-01 Commit:* `416dfb5` (feat(arm): implement decoupled kinematics and configuration layer (TASK-01))
 - *TASK-02 Commit:* `70b5230` (test(arm): implement native test suite and runner for kinematics and mock driver (TASK-02))
-- *TASK-03 Commit:* Pendiente
+- *TASK-03 Commit:* `4a4b58b` (refactor(arm): decouple embedded hardware layer and remove non-arm subsystems (TASK-03))
 - *TASK-04 Commit:* Pendiente
 - *TASK-05 Commit:* Pendiente
+
