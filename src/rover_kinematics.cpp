@@ -2,6 +2,11 @@
 #include <algorithm>
 #include <cstdlib>
 
+template <typename T>
+static inline T clamp_val(T val, T low, T high) {
+    return (val < low) ? low : ((val > high) ? high : val);
+}
+
 SteeringAngles calculate_steering(RoverMode mode, uint16_t steer_signal) {
     if (mode == DRIVE_TURN_SPIN) {
         // Fixed tangential angles for 360 spin
@@ -18,7 +23,7 @@ SteeringAngles calculate_steering(RoverMode mode, uint16_t steer_signal) {
         return { RC_CENTER, RC_CENTER, RC_CENTER, RC_CENTER };
     }
 
-    uint16_t clamped = std::clamp<uint16_t>(steer_signal, RC_LOW, RC_HIGH);
+    uint16_t clamped = clamp_val<uint16_t>(steer_signal, RC_LOW, RC_HIGH);
     uint16_t diff = static_cast<uint16_t>(std::abs(static_cast<int32_t>(RC_CENTER) - static_cast<int32_t>(clamped)));
 
     if (clamped < RC_CENTER) {
@@ -46,7 +51,7 @@ SteeringAngles calculate_steering(RoverMode mode, uint16_t steer_signal) {
 MotorOutputs calculate_motors(RoverMode mode, uint16_t throttle_signal, uint16_t steer_signal) {
     if (mode == DRIVE_TURN_NORMAL) {
         // Normal mode: identical forward/reverse/idle signal on both left and right sides
-        uint16_t throttle = (throttle_signal == 0) ? RC_CENTER : std::clamp<uint16_t>(throttle_signal, RC_LOW, RC_HIGH);
+        uint16_t throttle = (throttle_signal == 0) ? RC_CENTER : clamp_val<uint16_t>(throttle_signal, RC_LOW, RC_HIGH);
         return { throttle, throttle };
     }
 
@@ -55,7 +60,7 @@ MotorOutputs calculate_motors(RoverMode mode, uint16_t throttle_signal, uint16_t
         return { RC_CENTER, RC_CENTER };
     }
 
-    uint16_t steer = std::clamp<uint16_t>(steer_signal, RC_LOW, RC_HIGH);
+    uint16_t steer = clamp_val<uint16_t>(steer_signal, RC_LOW, RC_HIGH);
     uint16_t diff = static_cast<uint16_t>(std::abs(static_cast<int32_t>(RC_CENTER) - static_cast<int32_t>(steer)));
 
     if (steer < RC_CENTER) {

@@ -31,7 +31,7 @@ void rover_driving_init(void)
     rover_servo_write(SERVO_BACK_RIGHT, RC_CENTER);
 }
 
-static void setMotorInReverseMode(Servo motor) {
+static void setMotorInReverseMode(Servo &motor) {
   motor.writeMicroseconds(1400);
   delay(100);
   motor.writeMicroseconds(RC_CENTER);

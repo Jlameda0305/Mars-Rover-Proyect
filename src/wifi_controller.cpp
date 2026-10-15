@@ -47,13 +47,15 @@ void wifi_controller_init(const char* ssid, const char* password, WifiController
   memset(channel_values, 0, sizeof(channel_values));
   num_callbacks = 0;
 
-  if(!SPIFFS.begin(true)){
-    Serial.println("SPIFFS Mount Failed");
-    return;
+  bool spiffs_ok = SPIFFS.begin(true);
+  if(!spiffs_ok){
+    Serial.println("WARNING: SPIFFS mount failed! Continuing without SPIFFS static files.");
+  } else {
+    list_dir("/", 0);
   }
-  list_dir("/", 0);
+
   wifi_ssid = ssid;
-  password = password;
+  wifi_password = password;
 
   switch (mode)
   {
@@ -75,8 +77,15 @@ void wifi_controller_init(const char* ssid, const char* password, WifiController
   ws.onEvent(handle_websocket_event);
   server.addHandler(&ws);
 
-  server.serveStatic("/", SPIFFS, "/index.html", "");
-  server.serveStatic("/virtualjoystick.js", SPIFFS, "/virtualjoystick.js", "");
+  if (spiffs_ok) {
+    server.serveStatic("/", SPIFFS, "/index.html", "");
+    server.serveStatic("/virtualjoystick.js", SPIFFS, "/virtualjoystick.js", "");
+  } else {
+    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+      request->send(200, "text/html", "<h1>Mars Rover Simulation</h1><p>Running in Wokwi (SPIFFS not mounted)</p>");
+    });
+  }
+
   server.onNotFound(handle_not_found);
   server.begin();
 
@@ -132,6 +141,17 @@ static void reset_ch_values() {
 
 static void wifiEvent(WiFiEvent_t event, WiFiEventInfo_t info)
 {
+#if ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(2, 0, 0)
+  if (event == ARDUINO_EVENT_WIFI_STA_DISCONNECTED) {
+    wifi_connected = false;
+    if (info.wifi_sta_disconnected.reason == 6) {
+      Serial.println("NOT_AUTHED reconnect");
+      WiFi.reconnect();
+    }
+  } else if (event == ARDUINO_EVENT_WIFI_STA_GOT_IP) {
+    wifi_connected = true;
+  }
+#else
   if (event == SYSTEM_EVENT_STA_DISCONNECTED) {
     wifi_connected = false;
     if (info.disconnected.reason == 6) {
@@ -141,6 +161,7 @@ static void wifiEvent(WiFiEvent_t event, WiFiEventInfo_t info)
   } else if (event == SYSTEM_EVENT_STA_GOT_IP) {
     wifi_connected = true;
   }
+#endif
 }
 
 static void handle_websocket_event(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *payload, size_t length)

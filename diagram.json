@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "author": "Mars Rover Project",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "board-esp32-devkit-c-v4",
+      "id": "esp",
+      "top": 0,
+      "left": 0,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-servo",
+      "id": "esc_left",
+      "top": -120,
+      "left": 260,
+      "attrs": { "hornColor": "blue" }
+    },
+    {
+      "type": "wokwi-servo",
+      "id": "esc_right",
+      "top": 120,
+      "left": 260,
+      "attrs": { "hornColor": "orange" }
+    },
+    {
+      "type": "wokwi-logic-analyzer",
+      "id": "logic",
+      "top": -260,
+      "left": 0,
+      "attrs": {}
+    }
+  ],
+  "connections": [
+    [ "esp:TX", "$serialMonitor:RX", "green", [] ],
+    [ "esp:RX", "$serialMonitor:TX", "yellow", [] ],
+    [ "esp:17", "esc_left:PWM", "blue", [ "h20", "v-80" ] ],
+    [ "esp:5V", "esc_left:V+", "red", [ "h30", "v-100" ] ],
+    [ "esp:GND.1", "esc_left:GND", "black", [ "h10", "v-60" ] ],
+    [ "esp:13", "esc_right:PWM", "orange", [ "h20", "v80" ] ],
+    [ "esp:5V", "esc_right:V+", "red", [ "h30", "v100" ] ],
+    [ "esp:GND.2", "esc_right:GND", "black", [ "h10", "v60" ] ],
+    [ "esp:17", "logic:D0", "blue", [ "h-20", "v-120" ] ],
+    [ "esp:13", "logic:D1", "orange", [ "h-30", "v-140" ] ],
+    [ "esp:21", "logic:D2", "green", [ "h-40", "v-160" ] ],
+    [ "esp:22", "logic:D3", "cyan", [ "h-50", "v-180" ] ],
+    [ "esp:GND.1", "logic:GND", "black", [ "h-10", "v-100" ] ]
+  ],
+  "serialMonitor": {
+    "display": "always",
+    "newline": "lf"
+  },
+  "dependencies": {}
+}

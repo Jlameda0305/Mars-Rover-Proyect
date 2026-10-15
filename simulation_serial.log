@@ -1,0 +1,50 @@
+ets Jul 29 2019 12:21:46
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:1156
+load:0x40078000,len:11456
+ho 0 tail 12 room 4
+load:0x40080400,len:2972
+entry 0x400805dc
+[  1383][I][ESP32PWM.cpp:58] ESP32PWM(): [ESP32PWM] Non-ESP32S3 target - using LEDC only
+[  1396][D][esp32-hal-cpu.c:244] setCpuFrequencyMhz(): PLL: 480 / 2 = 240 Mhz, APB: 80000000 Hz
+[  1432][V][esp32-hal-uart.c:330] uartBegin(): UART0 baud(115200) Mode(800001c) rxPin(3) txPin(1)
+[  1442][V][esp32-hal-uart.c:416] uartBegin(): UART0 not installed. Starting installation
+[  1451][V][esp32-hal-uart.c:467] uartBegin(): UART0 initialization done.
+
+=================================
+ Mars Rover Firmware (Wokwi Sim) Mode: Standalone RC / WebSockets
+ Commands: F, B, L, R, S, P
+=================================
+[  1970][I][esp32-hal-i2c.c:75] i2cInit(): Initialising I2C Master: sda=21 scl=22 freq=100000
+[  1982][W][Wire.cpp:301] begin(): Bus already started in Master Mode.
+[  1990][E][Wire.cpp:499] requestFrom(): i2cWriteReadNonStop returned Error -1
+[  2003][W][ESP32Servo.cpp:84] attach(): [ESP32Servo] Attempting to Attach servo on pin=17 min=544 max=2400
+[  2014][I][ESP32PWM.cpp:530] attachPin(): [ESP32PWM] Pin Setup 17 with code 50
+[  2022][W][ESP32Servo.cpp:136] attach(): [ESP32Servo] Success to Attach servo : 17 on PWM 0
+[  2032][W][ESP32Servo.cpp:84] attach(): [ESP32Servo] Attempting to Attach servo on pin=13 min=544 max=2400
+[  2043][I][ESP32PWM.cpp:530] attachPin(): [ESP32PWM] Pin Setup 13 with code 50
+[  2051][W][ESP32Servo.cpp:136] attach(): [ESP32Servo] Success to Attach servo : 13 on PWM 1
+E (667) SPIFFS: spiffs partition could not be found
+[  2063][E][SPIFFS.cpp:89] begin(): Mounting SPIFFS failed! Error: 261
+WARNING: SPIFFS mount failed! Continuing without SPIFFS static files.
+[  2094][D][WiFiGeneric.cpp:1040] _eventCallback(): Arduino Event: 0 - WIFI_READY
+[  2271][V][WiFiGeneric.cpp:393] _arduino_event_cb(): AP Started
+[  2293][D][WiFiGeneric.cpp:1040] _eventCallback(): Arduino Event: 10 - AP_START
+[  2301][V][WiFiGeneric.cpp:97] set_esp_interface_ip(): Configuring SoftAP static IP: 192.168.4.5, MASK: 255.255.255.0, GW: 192.168.4.1
+[  2302][V][WiFiGeneric.cpp:396] _arduino_event_cb(): AP Stopped
+[  2319][D][WiFiGeneric.cpp:1040] _eventCallback(): Arduino Event: 11 - AP_STOP
+[  2330][V][WiFiGeneric.cpp:393] _arduino_event_cb(): AP Started
+[  2329][V][WiFiGeneric.cpp:143] set_esp_interface_ip(): SoftAP: 192.168.4.5 | Gateway: 192.168.4.1 | DHCP Start: 0.0.0.0 | Netmask: 255.255.255.0
+[  2349][D][WiFiGeneric.cpp:1040] _eventCallback(): Arduino Event: 10 - AP_START
+[  2349][V][WiFiGeneric.cpp:190] set_esp_interface_ip(): DHCP Server Range: 192.168.4.6 to 192.168.4.16
+Rover Ready (Simplified RC)! Core: 1
+[TELEMETRY] Mode: NORMAL | Motor: 1500 us | Steer: 1500 us
+[CMD_ACK] FORWARD: Throttle 1800 us, Steer 1500 us[CMD_ACK] BACKWARD: Throttle 1200 us, Steer 1500 us[TELEMETRY] Mode: NORMAL | Motor: 1200 us | Steer: 1500 us
+[CMD_ACK] TURN LEFT: Throttle 1600 us, Steer 1200 us[CMD_ACK] TURN RIGHT: Throttle 1600 us, Steer 1800 us[TELEMETRY] Mode: NORMAL | Motor: 1600 us | Steer: 1800 us
+[CMD_ACK] SPIN 360: Mode SPIN, Steer 1800 us[CMD_ACK] STOP / NEUTRAL: Throttle 1500 us, Steer 1500 us[TELEMETRY] Mode: NORMAL | Motor: 1500 us | Steer: 1500 us
+[CMD_ACK] CUSTOM: Steer=1350 us, Throttle=1750 us, Mode=NORMAL[TELEMETRY] Mode: NORMAL | Motor: 1750 us | Steer: 1350 us
+[TELEMETRY]

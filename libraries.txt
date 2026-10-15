@@ -1,0 +1,4 @@
+# Wokwi Web Library Dependencies
+ESP32Servo
+Adafruit PWM Servo Driver Library
+WebSockets
