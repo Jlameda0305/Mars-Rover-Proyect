@@ -69,3 +69,11 @@ constexpr uint8_t ARM_I2C_SDA_PIN = 21;
 constexpr uint8_t ARM_I2C_SCL_PIN = 22;
 constexpr uint8_t PCA9685_I2C_ADDR = 0x40;
 constexpr uint16_t PCA9685_PWM_FREQ = 60; // 60 Hz PWM update rate
+
+// WiFi AP & Controller defaults
+constexpr const char* ARM_WIFI_DEFAULT_SSID = "Robotic-Arm";
+constexpr uint8_t ARM_WIFI_DEFAULT_IP[4] = {192, 168, 4, 5};
+constexpr uint8_t ARM_WIFI_DEFAULT_GW[4] = {192, 168, 4, 1};
+constexpr uint8_t ARM_WIFI_DEFAULT_SUBNET[4] = {255, 255, 255, 0};
+constexpr uint16_t ARM_PULSE_NEUTRAL = 1500;
+

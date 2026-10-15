@@ -78,5 +78,14 @@ void loop() {
         }
     }
 
+    // Periodically broadcast telemetry to connected WebSocket clients (10 Hz)
+    static uint32_t s_last_broadcast_ms = 0;
+    uint32_t now_ms = millis();
+    if (now_ms - s_last_broadcast_ms >= 100) {
+        s_last_broadcast_ms = now_ms;
+        wifi_controller_broadcast_arm_state();
+    }
+
     vTaskDelay(pdMS_TO_TICKS(20));
 }
+
