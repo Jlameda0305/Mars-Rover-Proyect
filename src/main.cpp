@@ -13,7 +13,6 @@
 #include "wifi_controller.h"
 #include "rover_servo.h"
 #include "rover_driving.h"
-#include "switch_checker.h"
 
 #define DEBUG
 

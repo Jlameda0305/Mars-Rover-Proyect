@@ -1,6 +1,10 @@
 #pragma once
+#include <stdint.h>
 
-#include "switch_checker.h"
+typedef enum RoverMode {
+  DRIVE_TURN_NORMAL,
+  DRIVE_TURN_SPIN
+} RoverMode;
 
 void rover_driving_init(void);
 void rover_driving_set_drive_mode(RoverMode mode);
